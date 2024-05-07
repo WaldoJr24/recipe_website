@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Enter New Recipe
+{% endblock %}
+
+{% block content %}
+<body class="text-center">
+<div class="container">
+<form method="POST" class="form-register" action="/recipe_entry" style="color:black">
+
+    <br><br>
+    <img class="mb-4" src="static/newrecipe.png" alt="" style="width:180px;">
+    <br><br>
+    <h1 class="h3 mb-3 font-weight-normal">
+        Please Enter New Recipe
+    </h1>
+    <br>
+
+    <label for="difficulty" class="form-label">Difficulty</label>
+    <select class="form-select" id="difficulty" name="difficulty" aria-label="Default select example">
+        <option selected>Select a Difficulty</option>
+        <option value="Easy">Easy</option>
+        <option value="Medium">Medium</option>
+        <option value="Hard">Hard</option>
+    </select>
+    <!-- <label for="username" class="form-label">Username</label>
+    <input type="text" id="username" name="username" class="form-control"> -->
+    <label for="title" class="form-label">Title</label>
+    <input type="text" id="title" name="title" class="form-control">
+    <label for="ingredients" class="form-label">Ingredients</label>
+    <input type="text" id="ingredients" name="ingredients" class="form-control">
+    <label for="description" class="form-label">Description</label>
+    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+
+    <br>
+    <button type="submit" class="btn btn-light" style="background-color: yellowgreen;">Enter</button>
+
+</form>
+</div>
+</body>
+
+{% endblock %}
