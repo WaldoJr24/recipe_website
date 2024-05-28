@@ -37,6 +37,7 @@ def login_pages():
         result = db.session.execute(text(query_stmt))
 
         user = result.fetchall()
+        print(user)
 
         if not user:
             return render_template('login.html', cookie=None)
