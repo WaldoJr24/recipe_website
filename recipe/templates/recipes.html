@@ -26,7 +26,7 @@ Recipe List
                 <td>{{ item.difficulty }}</td>
                 <td>{{ item.username }}</td>
                 <td>{{ item.title }}</td>
-                <td>{{ item.ingredients}}</td>
+                <td>{{ item.ingredients|safe}}</td>
                 <td>
                     <a href="{{ url_for('recipe_item', item_id=item.id) }}">
                         <button type="button" class="btn btn-light" style="background-color: yellowgreen;">More Info</button>
