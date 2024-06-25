@@ -1,10 +1,12 @@
 from recipe import app, db
-from flask import render_template, request, url_for, redirect, flash
+from flask import render_template, request, url_for, redirect, flash, session
+from flask_session import Session
 from sqlalchemy import text
 
 @app.route('/')
 def home_page():
-    cookie = request.cookies.get('name')
+    cookie = session.get('username')
+    #cookie = request.cookies.get('name')
     print("<>home_page()")
     return render_template('home.html', cookie=cookie)
 
@@ -43,7 +45,8 @@ def login_pages():
             return render_template('login.html', cookie=None)
 
         resp = redirect('/')
-        resp.set_cookie('name', username)
+        session['username'] = username
+        #resp.set_cookie('name', username)
         print("<-login(), go to home_page")
         return resp
 
@@ -98,7 +101,8 @@ def register_page():
         db.session.execute(text(query_insert))
         db.session.commit()
         resp = redirect('/recipes')
-        resp.set_cookie('name', username)
+        session['username'] = username
+        #resp.set_cookie('name', username)
         print("<-register_page(), go to recipes_pages")
         return resp
 
@@ -107,9 +111,10 @@ def register_page():
 @app.route('/recipes')
 def recipes_pages():
 
-    cookie = request.cookies.get('name')
+    cookie = session.get('username')
+    #cookie = request.cookies.get('name')
     print("->recipes_pages()", cookie)
-    if not request.cookies.get('name'):
+    if not cookie:
         print("<-recipes_pages(), no cookie")
         return redirect(url_for('login_pages'))
 
@@ -123,14 +128,15 @@ def recipes_pages():
 
 @app.route('/logout')
 def logout():
+    session.pop('username', None)
     resp = redirect('/')
     resp.set_cookie('name', '', expires=0)
     return resp
 
 @app.route('/recipe_entry', methods=['GET', 'POST'])
 def recipe_entry():
-
-    cookie = request.cookies.get('name')
+    cookie = session.get('username')
+    #cookie = request.cookies.get('name')
     print("->recipe_entry()", cookie)
     if not cookie:
         print("no cookie")
@@ -164,6 +170,7 @@ def recipe_item(item_id):
     if not item:
         print("item not existing")
 
-    cookie = request.cookies.get('name')
+    cookie = session.get('username')
+    #cookie = request.cookies.get('name')
 
     return render_template('recipe_item.html', items=item, cookie=cookie)
