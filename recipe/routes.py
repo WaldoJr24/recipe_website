@@ -1,5 +1,5 @@
 from recipe import app, db
-from flask import render_template, request, url_for, redirect
+from flask import render_template, request, url_for, redirect, flash
 from sqlalchemy import text
 
 @app.route('/')
@@ -37,7 +37,7 @@ def login_pages():
         result = db.session.execute(text(query_stmt))
 
         user = result.fetchall()
-        print(user)
+        flash(f"User: '{user}', you are logged in!", category='success')
 
         if not user:
             return render_template('login.html', cookie=None)
