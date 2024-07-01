@@ -15,9 +15,9 @@ Recipe Item
             <h5 class="card-text">Submitted by: {{ items.username }}</h5>
             </div>
             <ul class="list-group list-group-flush">
-            <li class="list-group-item">Difficulty: {{ items.difficulty|safe }}</li>
-            <li class="list-group-item">Ingredients: {{ items.ingredients|safe}}</li>
-            <li class="list-group-item">Description: {{ items.description|safe}}</li>
+            <li class="list-group-item">Difficulty: {{ items.difficulty}}</li>
+            <li class="list-group-item">Ingredients: {{ items.ingredients}}</li>
+            <li class="list-group-item">Description: {{ items.description}}</li>
             </ul>
             <div class="card-body">
                 <a href="{{ url_for('recipes_pages') }}" class="btn btn-light" style="background-color: yellowgreen;">Back to Recipe List</a>

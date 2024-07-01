@@ -2,6 +2,8 @@ from recipe import app, db
 from flask import render_template, request, url_for, redirect, flash, session
 from flask_session import Session
 from sqlalchemy import text
+# import escape function for html escaping
+from html import escape
 # import rate limiter
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -16,8 +18,8 @@ limiter = Limiter(
 
 @app.route('/')
 def home_page():
-    cookie = session.get('username')
-    #cookie = request.cookies.get('name')
+
+    cookie = request.cookies.get('name')
     print("<>home_page()")
     return render_template('home.html', cookie=cookie)
 
@@ -46,7 +48,7 @@ def login_pages():
             print("something with password")
             return render_template('login.html', cookie=None)
 
-       # old code sql injectionable
+        # old code sql injectionable
         # query_stmt = f"select username from recipeusers where username = '{username}' and password = '{password}'"
         # print(query_stmt)
         # result = db.session.execute(text(query_stmt))
@@ -63,9 +65,10 @@ def login_pages():
         if not user:
             return render_template('login.html', cookie=None)
 
-        resp = redirect('/')
+        
         session['username'] = username
-        #resp.set_cookie('name', username)
+        resp = redirect('/')
+        resp.set_cookie('name', username)
         print("<-login(), go to home_page")
         return resp
 
@@ -135,7 +138,7 @@ def register_page():
         db.session.commit()
         resp = redirect('/recipes')
         session['username'] = username
-        #resp.set_cookie('name', username)
+        resp.set_cookie('name', username)
         print("<-register_page(), go to recipes_pages")
         return resp
 
@@ -143,9 +146,7 @@ def register_page():
 
 @app.route('/recipes')
 def recipes_pages():
-
-    cookie = session.get('username')
-    #cookie = request.cookies.get('name')
+    cookie = request.cookies.get('name')
     print("->recipes_pages()", cookie)
     if not cookie:
         print("<-recipes_pages(), no cookie")
@@ -155,6 +156,7 @@ def recipes_pages():
     result = db.session.execute(text(query_stmt))
     itemsquery = result.fetchall()
 
+
     print(itemsquery)
     print("<-recipes_pages()=", cookie)
     return render_template('recipes.html', items=itemsquery, cookie=cookie)
@@ -163,26 +165,25 @@ def recipes_pages():
 def logout():
     session.pop('username', None)
     resp = redirect('/')
-    resp.set_cookie('name', '', expires=0)
+    resp.delete_cookie('name')
     return resp
 
 @app.route('/recipe_entry', methods=['GET', 'POST'])
 def recipe_entry():
-    cookie = session.get('username')
-    #cookie = request.cookies.get('name')
+    cookie = request.cookies.get('name')
     print("->recipe_entry()", cookie)
     if not cookie:
         print("no cookie")
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        username = request.cookies.get('name')
+        username = session.get('username')
         title = request.form.get('title')
         ingredients = request.form.get('ingredients')
         description = request.form.get('description')
         difficulty = request.form.get('difficulty')
 
-         # old code sql injectionable
+        # old code sql injectionable
         # query_insert = f"INSERT INTO recipeitems (username, title, description,ingredients, difficulty) VALUES ('{username}', '{title}', '{description}', '{ingredients}', '{difficulty}')"
         # print(query_insert)
         # db.session.execute(text(query_insert))
@@ -207,11 +208,12 @@ def recipe_item(item_id):
     query_stmt = text("SELECT * FROM recipeitems WHERE id = :item_id")
     result = db.session.execute(query_stmt, {'item_id': item_id})
     item = result.fetchone()
+
     print(query_stmt)
     if not item:
         print("item not existing")
 
-    cookie = session.get('username')
-    #cookie = request.cookies.get('name')
+    session = session.get('username')
+    cookie = request.cookies.get('name')
 
     return render_template('recipe_item.html', items=item, cookie=cookie)

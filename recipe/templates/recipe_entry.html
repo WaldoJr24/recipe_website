@@ -17,7 +17,7 @@ Enter New Recipe
     </h1>
     <br>
 
-    <label for="difficulty" class="form-label">Difficulty</label>
+    <label for="difficulty" class="form-label" >Difficulty</label>
     <select class="form-select" id="difficulty" name="difficulty" aria-label="Default select example">
         <option selected>Select a Difficulty</option>
         <option value="Easy">Easy</option>
@@ -25,17 +25,34 @@ Enter New Recipe
         <option value="Hard">Hard</option>
     </select>
     <label for="title" class="form-label">Title</label>
-    <input type="text" id="title" name="title" class="form-control">
+    <input type="text" id="title" name="title" class="form-control" required pattern="^[a-zA-Z0-9\s]+$">
     <label for="ingredients" class="form-label">Ingredients</label>
-    <input type="text" id="ingredients" name="ingredients" class="form-control">
+    <input type="text" id="ingredients" name="ingredients" class="form-control" required pattern="^[a-zA-Z0-9\s]+$">
     <label for="description" class="form-label">Description</label>
-    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+    <textarea class="form-control" id="description" name="description" rows="3" required pattern="^[a-zA-Z0-9\s]+$"></textarea>
 
     <br>
     <button type="submit" class="btn btn-light" style="background-color: yellowgreen;">Enter</button>
 
 </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('recipeForm').addEventListener('submit', function(event) {
+            
+            // Validate description
+            const description = document.getElementById('description').value;
+            if (!/^[a-zA-Z0-9\s]+$/.test(description)) {
+                alert('Description can only contain alphanumeric characters and spaces.');
+                event.preventDefault();
+                return;
+            }
+        });
+    });
+</script>
+
+
 </body>
 
 {% endblock %}
