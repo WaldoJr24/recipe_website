@@ -2,6 +2,17 @@ from recipe import app, db
 from flask import render_template, request, url_for, redirect, flash, session
 from flask_session import Session
 from sqlalchemy import text
+# import rate limiter
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+### add a rate limiter to the login route to prevent brute force attacks
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"]
+)
+
 
 @app.route('/')
 def home_page():
@@ -11,6 +22,7 @@ def home_page():
     return render_template('home.html', cookie=cookie)
 
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")  # Apply rate limiting to the login route
 def login_pages():
     print("login was called")
 
@@ -34,12 +46,19 @@ def login_pages():
             print("something with password")
             return render_template('login.html', cookie=None)
 
-        query_stmt = f"select username from recipeusers where username = '{username}' and password = '{password}'"
+       # old code sql injectionable
+        # query_stmt = f"select username from recipeusers where username = '{username}' and password = '{password}'"
+        # print(query_stmt)
+        # result = db.session.execute(text(query_stmt))
+    	
+        # new code with parameterized query
+        query_stmt = text("SELECT username FROM recipeusers WHERE username = :username AND password = :password")
         print(query_stmt)
-        result = db.session.execute(text(query_stmt))
+        result = db.session.execute(query_stmt, {'username': username, 'password': password})
 
         user = result.fetchall()
-        flash(f"User: '{user}', you are logged in!", category='success')
+        if user:
+            flash(f"User: '{user}', you are logged in!", category='success')
 
         if not user:
             return render_template('login.html', cookie=None)
@@ -86,9 +105,16 @@ def register_page():
             print("<-register_page(), password1 not valid")
             return render_template('register.html', cookie=None)
 
-        query_stmt = f"select * from recipeusers where username = '{username}'"
+        # old code sql injectionable
+        # query_stmt = f"select * from recipeusers where username = '{username}'"
+        # print(query_stmt)
+        # result = db.session.execute(text(query_stmt))
+
+        # new code with parameterized query
+        query_stmt = text("SELECT * FROM recipeusers WHERE username = :username")
         print(query_stmt)
-        result = db.session.execute(text(query_stmt))
+        result = db.session.execute(query_stmt, {'username': username})
+
         item = result.fetchone()
         print(item)
 
@@ -96,9 +122,16 @@ def register_page():
             print("Username exists")
             return render_template('register.html', cookie=None)
 
-        query_insert = f"insert into recipeusers (username, email_address, password) values ('{username}', '{email}', '{password1}')"
+        # old code sql injectionable
+        # query_insert = f"insert into recipeusers (username, email_address, password) values ('{username}', '{email}', '{password1}')"
+        # print(query_insert)
+        # db.session.execute(text(query_insert))
+
+        # new code with parameterized query
+        query_insert = text("INSERT INTO recipeusers (username, email_address, password) VALUES (:username, :email, :password)")
         print(query_insert)
-        db.session.execute(text(query_insert))
+        db.session.execute(query_insert, {'username': username, 'email': email, 'password': password1})
+
         db.session.commit()
         resp = redirect('/recipes')
         session['username'] = username
@@ -149,10 +182,15 @@ def recipe_entry():
         description = request.form.get('description')
         difficulty = request.form.get('difficulty')
 
-        print("INSERT RECIPE DEBUG username:", username)
-        query_insert = f"INSERT INTO recipeitems (username, title, description,ingredients, difficulty) VALUES ('{username}', '{title}', '{description}', '{ingredients}', '{difficulty}')"
+         # old code sql injectionable
+        # query_insert = f"INSERT INTO recipeitems (username, title, description,ingredients, difficulty) VALUES ('{username}', '{title}', '{description}', '{ingredients}', '{difficulty}')"
+        # print(query_insert)
+        # db.session.execute(text(query_insert))
+
+        # new code with parameterized query
+        query_insert = text("INSERT INTO recipeitems (username, title, description, ingredients, difficulty) VALUES (:username, :title, :description, :ingredients, :difficulty)")
         print(query_insert)
-        db.session.execute(text(query_insert))
+        db.session.execute(query_insert, {'username': username, 'title': title, 'description': description, 'ingredients': ingredients, 'difficulty': difficulty})
         db.session.commit()
         print("successfully added")
         return redirect('/recipes')
@@ -162,9 +200,12 @@ def recipe_entry():
 @app.route('/recipe_item/<int:item_id>', methods=['GET'])
 def recipe_item(item_id):
     print("->recipe_item()")
-    query_stmt = f"select * from recipeitems where id={item_id}"
-
-    result = db.session.execute(text(query_stmt))
+    # old code sql injectionable
+    # query_stmt = f"select * from recipeitems where id={item_id}"
+    # result = db.session.execute(text(query_stmt))
+    # new code with parameterized query
+    query_stmt = text("SELECT * FROM recipeitems WHERE id = :item_id")
+    result = db.session.execute(query_stmt, {'item_id': item_id})
     item = result.fetchone()
     print(query_stmt)
     if not item:
