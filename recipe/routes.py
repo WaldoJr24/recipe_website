@@ -18,8 +18,8 @@ limiter = Limiter(
 
 @app.route('/')
 def home_page():
-
-    cookie = request.cookies.get('name')
+    cookie = session.get('username')
+    #cookie = request.cookies.get('name')
     print("<>home_page()")
     return render_template('home.html', cookie=cookie)
 
